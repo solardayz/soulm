@@ -11,7 +11,7 @@
 [ext_resource type="Script" path="res://scripts/touch_controls.gd" id="s_touch"]
 [ext_resource type="Shader" path="res://scripts/fog_gate.gdshader" id="sh_fog"]
 [ext_resource type="PackedScene" path="res://assets/mixamo/paladin/paladin.fbx" id="m_knight"]
-[ext_resource type="PackedScene" path="res://assets/characters/Skeleton_Warrior.glb" id="m_boss"]
+[ext_resource type="PackedScene" path="res://assets/mixamo/mutant/mutant.fbx" id="m_boss"]
 [ext_resource type="PackedScene" path="res://assets/dungeon/torch_lit.glb" id="m_torch"]
 [ext_resource type="PackedScene" path="res://assets/dungeon/candle_lit.glb" id="m_candle"]
 
@@ -147,7 +147,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
 shape = SubResource("boss_shape")
 
 [node name="Model" parent="Boss" instance=ExtResource("m_boss")]
-transform = Transform3D(-2.5, 0, 0, 0, 2.5, 0, 0, 0, -2.5, 0, 0, 0)
+transform = Transform3D(-1.7, 0, 0, 0, 1.7, 0, 0, 0, -1.7, 0, 0, 0)
 
 [node name="CoiledSword" type="MeshInstance3D" parent="Boss"]
 transform = Transform3D(1, 0, 0, 0, 0.819152, -0.573576, 0, 0.573576, 0.819152, 0, 2.6, 0.9)
@@ -265,7 +265,7 @@ grow_vertical = 0
 offset_right = 640.0
 offset_bottom = 28.0
 theme_override_font_sizes/font_size = 22
-text = "스켈레톤 킹 (해골 군주)"
+text = "심판자 (돌연변이 괴물)"
 
 [node name="Bar" type="ProgressBar" parent="HUD/BossBox"]
 offset_top = 32.0

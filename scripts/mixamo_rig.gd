@@ -7,11 +7,11 @@ const ANIM_DIR := "res://assets/mixamo/anim/"
 const HIPS_POS_PATH := "Skeleton3D:mixamorig_Hips"
 
 
-## clips: { "Idle": "idle", ... } (이름 → 파일 이름, .fbx 제외) · loops: 반복 재생할 이름들
-static func build(player: AnimationPlayer, clips: Dictionary, loops: Array) -> void:
+## clips: { "Idle": "idle", ... } (이름 → 파일 이름, .fbx 제외) · loops: 반복 재생할 이름들 · dir: 클립 폴더
+static func build(player: AnimationPlayer, clips: Dictionary, loops: Array, dir: String = ANIM_DIR) -> void:
 	var lib := AnimationLibrary.new()
 	for name in clips:
-		var path: String = ANIM_DIR + clips[name] + ".fbx"
+		var path: String = dir + clips[name] + ".fbx"
 		var ps: PackedScene = load(path)
 		if ps == null:
 			push_warning("Mixamo 클립 없음: " + path)

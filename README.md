@@ -27,7 +27,7 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 ## 모바일
 터치 기기에서는 왼쪽 가상 조이스틱, 오른쪽 공격·구르기·막기(홀드)·패리·에스트·락온 버튼이 자동으로 뜨고, 상호작용이 가능할 때 E 버튼이 나타난다. 화면 나머지 부분을 드래그하면 시점 회전. (`scripts/touch_controls.gd`, 코드로 그린 UI라 씬 수정 없이 버튼 위치·크기를 바꿀 수 있다)
 
-## 보스 "심판자 IUDEX"
+## 보스 "심판자" (Mixamo Mutant ×1.7)
 - 잠든 상태 → 검을 뽑으면 깨어남 → 추격(걷기/달리기) → 사거리 안에서 2H 예비동작 뒤 공격(찍기·베기·찌르기)
 - 체력 50% 이하 → 2페이즈: 색이 어두워지고 25% 빨라지며 회전 베기 추가
 - 예비동작을 보고 패리 → 스태거 2.6초 → 리포스트. 누적 피해 150마다 잠깐 휘청
@@ -49,12 +49,14 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 
 ## 에셋
 ### Mixamo (Adobe, 게임 안에 포함해 쓰는 건 무료 · 원본 파일 재배포 금지)
-- 플레이어: Paladin WProp J Nordstrom + Pro Sword and Shield Pack + Stand To Roll — `assets/mixamo/`(저장소에 올리지 않음, .gitignore). 받는 방법: mixamo.com 로그인 → Characters에서 Paladin → Download(FBX Binary, T-pose) → Animations에서 "Pro Sword and Shield Pack"과 "Stand To Roll"(In Place) → `assets/mixamo/{paladin,anim}/` 에 `scripts/player.gd` 의 CLIPS 이름으로 저장.
+- 플레이어: Paladin WProp J Nordstrom + Pro Sword and Shield Pack + Stand To Roll — `assets/mixamo/{paladin,anim}/`
+- 보스: Mutant + Creature Pack(idle·breathing idle·walking·run·swiping·punch·jump attack·roaring·dying·flexing) — `assets/mixamo/{mutant,mutant_anim}/`
+- 둘 다 저장소에 올리지 않는다(.gitignore). 웹 빌드(.pck)에는 들어간다. 받는 방법: mixamo.com 로그인 → Characters에서 Paladin → Download(FBX Binary, T-pose) → Animations에서 "Pro Sword and Shield Pack"과 "Stand To Roll"(In Place) → `assets/mixamo/{paladin,anim}/` 에 `scripts/player.gd` 의 CLIPS 이름으로 저장.
 
 ### KayKit (모두 CC0 — Kay Lousberg, kaylousberg.com)
 - KayKit Dungeon Remastered 1.0 — 바닥·벽·기둥·잔해·횃불·배너
 - KayKit Character Pack: Adventurers 1.0 — (이전 플레이어 Knight, 지금은 안 씀)
-- KayKit Character Pack: Skeletons 1.0 — 보스(Skeleton_Warrior ×2.2, 애니메이션 95개) + 도끼
+- KayKit Character Pack: Skeletons 1.0 — (이전 보스 Skeleton_Warrior·스켈레톤 킹, 지금은 안 씀)
 라이선스 원문은 `assets/characters/LICENSE_*.txt`, `assets/dungeon/LICENSE_dungeon.txt`. 원본 전체 팩은 `_downloads/`(지워도 됨).
 
 ## 한계 / 다음 할 일

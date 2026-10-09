@@ -1,6 +1,7 @@
 extends CharacterBody3D
 ## 심판자(IUDEX) — 아리나 한가운데 검에 꿰인 채 잠들어 있다. 검을 뽑으면 깨어나 추격·공격.
-## 공격은 예비동작이 긴 2H 모션. 패리 성공 시 스태거(리포스트 기회). 체력 50% 이하에서 2페이즈.
+## 모델은 Mixamo Mutant(근육 괴물) + Creature Pack 클립. 공격은 할퀴기·펀치·점프 내려찍기.
+## 패리 성공 시 스태거(리포스트 기회). 체력 50% 이하에서 2페이즈(포효 후 빨라지고 점프 공격이 넓어진다).
 
 signal hp_changed(hp: int, hp_max: int)
 signal awakened
@@ -18,15 +19,31 @@ const GRAVITY := 22.0
 const STAGGER_TIME := 2.6
 const POISE := 150 # 이만큼 맞으면 잠깐 휘청
 
+# hit: 클립 진행률 중 명중 시점 · speed: 클립 재생 속도 (Mixamo 클립 길이가 제각각이라 공격마다 정한다)
 const ATTACKS_P1 := [
-	{"anim": "2H_Melee_Attack_Chop", "dmg": 32, "hit": 0.52, "range": 4.0, "arc": 70.0, "cd": 1.2, "lunge": 1.5},
-	{"anim": "2H_Melee_Attack_Slice", "dmg": 26, "hit": 0.48, "range": 4.4, "arc": 120.0, "cd": 0.9, "lunge": 1.0},
-	{"anim": "2H_Melee_Attack_Stab", "dmg": 36, "hit": 0.5, "range": 5.4, "arc": 40.0, "cd": 1.3, "lunge": 3.5}
+	{"anim": "Swipe", "dmg": 28, "hit": 0.45, "range": 3.8, "arc": 110.0, "cd": 1.0, "lunge": 1.0, "speed": 1.1},
+	{"anim": "Punch", "dmg": 34, "hit": 0.5, "range": 3.6, "arc": 60.0, "cd": 1.1, "lunge": 1.5, "speed": 0.9},
+	{"anim": "Jump_Attack", "dmg": 40, "hit": 0.62, "range": 6.0, "arc": 50.0, "cd": 1.5, "lunge": 3.5, "speed": 1.25}
 ]
 const ATTACKS_P2 := [
-	{"anim": "2H_Melee_Attack_Spin", "dmg": 48, "hit": 0.5, "range": 4.6, "arc": 360.0, "cd": 1.4, "lunge": 0.5}
+	{"anim": "Jump_Attack", "dmg": 50, "hit": 0.62, "range": 7.0, "arc": 100.0, "cd": 1.3, "lunge": 4.5, "speed": 1.35}
 ]
-const LOOPS := ["Idle_Combat", "Running_A", "Walking_D_Skeletons", "Skeleton_Inactive_Standing_Pose"]
+# 이름 → assets/mixamo/mutant_anim/<파일>.fbx
+const CLIPS := {
+	"Dormant": "breathing_idle",
+	"Awaken": "roar",
+	"Idle": "idle",
+	"Walk": "walk",
+	"Run": "run",
+	"Swipe": "swipe",
+	"Punch": "punch",
+	"Jump_Attack": "jump_attack",
+	"Stagger": "breathing_idle",
+	"Flinch": "flex",
+	"Roar": "roar",
+	"Death": "dying"
+}
+const LOOPS := ["Idle", "Run", "Walk", "Dormant", "Stagger"]
 
 var hp := HP_MAX
 var state := S.DORMANT
@@ -54,12 +71,10 @@ const PARRY_CUE_SECONDS := 0.34 # 명중 직전 이 시간 동안 부채꼴이 �
 func _ready() -> void:
 	add_to_group("boss")
 	_player = get_tree().get_first_node_in_group("player")
-	for a in LOOPS:
-		if anim.has_animation(a):
-			anim.get_animation(a).loop_mode = Animation.LOOP_LINEAR
+	MixamoRig.build(anim, CLIPS, LOOPS, "res://assets/mixamo/mutant_anim/")
 	_attach_equipment()
 	_build_range_indicator()
-	_play("Skeleton_Inactive_Standing_Pose")
+	_play("Dormant")
 	hp_changed.emit(hp, HP_MAX)
 
 
@@ -112,14 +127,14 @@ func _attach_equipment() -> void:
 	
 	var bone_r := -1
 	var bone_l := -1
-	var bone_head := -1
+	var bone_head := skel.find_bone("mixamorig_Head") # Mixamo 리그는 이름이 고정
 	for i in skel.get_bone_count():
 		var bname := skel.get_bone_name(i).to_lower()
 		if bname.begins_with("handslot") and bname.ends_with("r"):
 			bone_r = i
 		elif bname.begins_with("handslot") and bname.ends_with("l"):
 			bone_l = i
-		elif "head" in bname:
+		elif bone_head < 0 and "head" in bname:
 			bone_head = i
 
 	# 1. 오른손 무기: 해골 대검/도끼
@@ -169,7 +184,7 @@ func awaken() -> void:
 		var tw := create_tween()
 		tw.tween_property(sword, "position:y", sword.position.y + 3.0, 0.8)
 		tw.tween_callback(sword.queue_free)
-	_play("Skeletons_Awaken_Standing")
+	_play("Awaken", 1.2)
 
 
 func reset() -> void:
@@ -185,7 +200,7 @@ func reset() -> void:
 	global_position = get_meta("spawn", global_position)
 	rotation.y = 0
 	_tint(Color(1, 1, 1))
-	_play("Skeleton_Inactive_Standing_Pose")
+	_play("Dormant")
 	hp_changed.emit(hp, HP_MAX)
 
 
@@ -208,7 +223,7 @@ func _physics_process(delta: float) -> void:
 				lockable = true
 				awakened.emit()
 				message.emit("심판자가 깨어났다")
-				_play("Idle_Combat")
+				_play("Idle")
 		S.CHASE:
 			_chase(delta)
 		S.ATTACK:
@@ -238,7 +253,7 @@ func _chase(delta: float) -> void:
 	if _player == null or _player.is_dead():
 		velocity.x = 0
 		velocity.z = 0
-		_play("Idle_Combat")
+		_play("Idle")
 		return
 	var to := _to_player()
 	var dist := to.length()
@@ -252,7 +267,7 @@ func _chase(delta: float) -> void:
 		_state_time = 0.0
 		velocity.x = 0
 		velocity.z = 0
-		_play(_attack["anim"], 1.05 * _speed_mult)
+		_play(_attack["anim"], float(_attack.get("speed", 1.0)) * _speed_mult)
 		_show_range(_attack)
 		return
 	if dist > 3.0:
@@ -261,13 +276,13 @@ func _chase(delta: float) -> void:
 		var dir := to.normalized()
 		velocity.x = dir.x * spd
 		velocity.z = dir.z * spd
-		_play("Running_A" if run else "Walking_D_Skeletons", _speed_mult)
+		_play("Run" if run else "Walk", _speed_mult)
 	else:
 		# 사거리 안에서 쿨다운 대기 — 천천히 맴돈다
 		var side := to.normalized().cross(Vector3.UP)
 		velocity.x = side.x * 1.2
 		velocity.z = side.z * 1.2
-		_play("Idle_Combat")
+		_play("Idle")
 
 
 func _attacking(delta: float) -> void:
@@ -291,7 +306,7 @@ func _attacking(delta: float) -> void:
 		_hide_range()
 		state = S.CHASE
 		_cooldown = _attack["cd"] / _speed_mult
-		_play("Idle_Combat")
+		_play("Idle")
 
 
 func _strike() -> void:
@@ -308,7 +323,7 @@ func _strike() -> void:
 			staggered = true
 			state = S.STAGGER
 			_state_time = 0.0
-			_play("Hit_B", 0.35)
+			_play("Stagger", 0.6)
 			message.emit("패리 성공 — 리포스트!")
 		"block":
 			message.emit("막았다")
@@ -329,7 +344,7 @@ func take_hit(damage: int, from: Node3D = null) -> void:
 		staggered = false
 		lockable = false
 		velocity = Vector3.ZERO
-		_play("Death_C_Skeletons")
+		_play("Death")
 		defeated.emit()
 		return
 	if phase == 1 and hp <= HP_MAX / 2:
@@ -339,23 +354,23 @@ func take_hit(damage: int, from: Node3D = null) -> void:
 		_tint(Color(0.85, 0.25, 0.2))
 		state = S.FLINCH
 		_state_time = -1.2 # Taunt 동안 멈춤
-		_play("Taunt_Longer", 1.3)
+		_play("Roar", 1.3)
 		phase_changed.emit(2)
-		message.emit("해골 군주가 붉은 분노를 내뿜는다!")
+		message.emit("괴물이 붉은 분노를 내뿜는다!")
 		return
 	if staggered:
 		_hide_range()
 		staggered = false
 		state = S.FLINCH
 		_state_time = 0.0
-		_play("Hit_A")
+		_play("Flinch", 2.5)
 		return
 	_poise_damage += damage
 	if _poise_damage >= POISE and state != S.ATTACK:
 		_poise_damage = 0
 		state = S.FLINCH
 		_state_time = 0.0
-		_play("Hit_A", 1.3)
+		_play("Flinch", 3.0)
 
 
 func _turn_toward(dir: Vector3, delta: float) -> void:
