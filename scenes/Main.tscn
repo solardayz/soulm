@@ -147,7 +147,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
 shape = SubResource("boss_shape")
 
 [node name="Model" parent="Boss" instance=ExtResource("m_boss")]
-transform = Transform3D(-2.2, 0, 0, 0, 2.2, 0, 0, 0, -2.2, 0, 0, 0)
+transform = Transform3D(-2.5, 0, 0, 0, 2.5, 0, 0, 0, -2.5, 0, 0, 0)
 
 [node name="CoiledSword" type="MeshInstance3D" parent="Boss"]
 transform = Transform3D(1, 0, 0, 0, 0.819152, -0.573576, 0, 0.573576, 0.819152, 0, 2.6, 0.9)
@@ -265,7 +265,7 @@ grow_vertical = 0
 offset_right = 640.0
 offset_bottom = 28.0
 theme_override_font_sizes/font_size = 22
-text = "심판자 IUDEX"
+text = "스켈레톤 킹 (해골 군주)"
 
 [node name="Bar" type="ProgressBar" parent="HUD/BossBox"]
 offset_top = 32.0

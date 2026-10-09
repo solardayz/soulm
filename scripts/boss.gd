@@ -57,7 +57,7 @@ func _ready() -> void:
 	for a in LOOPS:
 		if anim.has_animation(a):
 			anim.get_animation(a).loop_mode = Animation.LOOP_LINEAR
-	_attach_axe()
+	_attach_equipment()
 	_build_range_indicator()
 	_play("Skeleton_Inactive_Standing_Pose")
 	hp_changed.emit(hp, HP_MAX)
@@ -104,25 +104,59 @@ func _hide_range() -> void:
 		_range_mesh.visible = false
 
 
-## 뼈 'handslot.r' 에 도끼를 붙인다 (KayKit 리그 규격)
-func _attach_axe() -> void:
+## 뼈 'handslot.r'에 무기, 'handslot.l'에 대형 해골 방패를 장착하고 머리에 붉은 안광을 붙인다
+func _attach_equipment() -> void:
 	var skel: Skeleton3D = model.find_child("Skeleton3D", true, false)
 	if skel == null:
 		return
-	var bone := -1
+	
+	var bone_r := -1
+	var bone_l := -1
+	var bone_head := -1
 	for i in skel.get_bone_count():
-		if skel.get_bone_name(i).begins_with("handslot") and skel.get_bone_name(i).ends_with("r"):
-			bone = i
-	if bone < 0:
-		return
-	var axe_scene: PackedScene = load("res://assets/characters/weapons/Skeleton_Axe.gltf")
-	if axe_scene == null:
-		return
-	var att := BoneAttachment3D.new()
-	att.bone_idx = bone
-	skel.add_child(att)
-	var axe: Node3D = axe_scene.instantiate()
-	att.add_child(axe)
+		var bname := skel.get_bone_name(i).to_lower()
+		if bname.begins_with("handslot") and bname.ends_with("r"):
+			bone_r = i
+		elif bname.begins_with("handslot") and bname.ends_with("l"):
+			bone_l = i
+		elif "head" in bname:
+			bone_head = i
+
+	# 1. 오른손 무기: 해골 대검/도끼
+	if bone_r >= 0:
+		var wp_scene: PackedScene = load("res://assets/characters/weapons/Skeleton_Blade.gltf")
+		if wp_scene == null:
+			wp_scene = load("res://assets/characters/weapons/Skeleton_Axe.gltf")
+		if wp_scene:
+			var att_r := BoneAttachment3D.new()
+			att_r.bone_idx = bone_r
+			skel.add_child(att_r)
+			var wp: Node3D = wp_scene.instantiate()
+			wp.scale = Vector3(1.3, 1.3, 1.3)
+			att_r.add_child(wp)
+
+	# 2. 왼손 무기: 대형 해골 방패
+	if bone_l >= 0:
+		var shield_scene: PackedScene = load("res://assets/characters/weapons/Skeleton_Shield_Large_A.gltf")
+		if shield_scene:
+			var att_l := BoneAttachment3D.new()
+			att_l.bone_idx = bone_l
+			skel.add_child(att_l)
+			var shield: Node3D = shield_scene.instantiate()
+			shield.scale = Vector3(1.4, 1.4, 1.4)
+			att_l.add_child(shield)
+
+	# 3. 해골 눈빛: 붉은 안광 효과 (Dark Souls 보스 감성)
+	if bone_head >= 0:
+		var att_head := BoneAttachment3D.new()
+		att_head.bone_idx = bone_head
+		skel.add_child(att_head)
+		var eye_light := OmniLight3D.new()
+		eye_light.light_color = Color(1.0, 0.25, 0.1)
+		eye_light.light_energy = 3.0
+		eye_light.omni_range = 3.5
+		eye_light.position = Vector3(0, 0.35, 0.35)
+		att_head.add_child(eye_light)
 
 
 ## 플레이어가 검을 뽑으면 호출
@@ -295,19 +329,19 @@ func take_hit(damage: int, from: Node3D = null) -> void:
 		staggered = false
 		lockable = false
 		velocity = Vector3.ZERO
-		_play("Death_A")
+		_play("Death_C_Skeletons")
 		defeated.emit()
 		return
 	if phase == 1 and hp <= HP_MAX / 2:
 		_hide_range()
 		phase = 2
 		_speed_mult = 1.25
-		_tint(Color(0.35, 0.2, 0.25))
+		_tint(Color(0.85, 0.25, 0.2))
 		state = S.FLINCH
 		_state_time = -1.2 # Taunt 동안 멈춤
 		_play("Taunt_Longer", 1.3)
 		phase_changed.emit(2)
-		message.emit("심판자가 본성을 드러낸다")
+		message.emit("해골 군주가 붉은 분노를 내뿜는다!")
 		return
 	if staggered:
 		_hide_range()

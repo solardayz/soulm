@@ -1,7 +1,7 @@
 extends Node3D
 ## 게임 흐름 — 신호를 묶는다: 안개문 통과 → 검 뽑기 → 보스전 → 승리/사망·부활
 
-const BOSS_NAME := "심판자 IUDEX"
+const BOSS_NAME := "스켈레톤 킹 (해골 군주)"
 
 @onready var player: CharacterBody3D = $Player
 @onready var boss: CharacterBody3D = $Boss
@@ -25,7 +25,7 @@ func _ready() -> void:
 	boss.message.connect(hud.show_message)
 	boss.defeated.connect(_on_boss_defeated)
 	fog_gate.prompt.connect(_prompt)
-	fog_gate.traversed.connect(func(): hud.show_message("심판자의 뜰", 2.0))
+	fog_gate.traversed.connect(func(): hud.show_message("해골 군주의 뜰", 2.0))
 	bonfire.prompt.connect(_prompt)
 	bonfire.rested.connect(_on_rested)
 	sword_prompt.body_entered.connect(func(b): if b.is_in_group("player"): _sword_near = true; _sword_prompt())
@@ -40,7 +40,7 @@ func _prompt(text: String) -> void:
 
 
 func _sword_prompt() -> void:
-	_prompt("검을 뽑는다  [E]" if _sword_near and boss.state == boss.S.DORMANT else "")
+	_prompt("검을 뽑는다 (해골 군주 각성)  [E]" if _sword_near and boss.state == boss.S.DORMANT else "")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -53,7 +53,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_boss_defeated() -> void:
 	hud.hide_boss()
-	hud.show_big("심판자를 쓰러뜨렸다", Color(1.0, 0.85, 0.45), 3.5)
+	hud.show_big("스켈레톤 킹을 쓰러뜨렸다", Color(1.0, 0.85, 0.45), 3.5)
 	fog_gate.dissolve()
 
 
