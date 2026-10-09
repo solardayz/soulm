@@ -154,7 +154,7 @@ func _build_guide() -> void:
 	box.border_color = Color(0.75, 0.62, 0.35, 0.5)
 	box.set_border_width_all(1)
 	box.set_corner_radius_all(8)
-	box.set_content_margin_all(12)
+	box.set_content_margin_all(16)
 	_guide.add_theme_stylebox_override("panel", box)
 	_guide.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_guide.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -166,20 +166,20 @@ func _build_guide() -> void:
 
 	var title := Label.new()
 	title.text = "조작법   (H 숨기기)"
-	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_font_size_override("font_size", 19)
 	title.add_theme_color_override("font_color", Color(0.95, 0.85, 0.6, 0.95))
 	v.add_child(title)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10)
-	grid.add_theme_constant_override("v_separation", 3)
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 5)
 	v.add_child(grid)
 	for row in KEYS:
 		grid.add_child(_keycap(row[0]))
 		var d := Label.new()
 		d.text = row[1]
-		d.add_theme_font_size_override("font_size", 13)
+		d.add_theme_font_size_override("font_size", 17)
 		d.add_theme_color_override("font_color", Color(0.93, 0.92, 0.88, 0.95))
 		d.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		grid.add_child(d)
@@ -210,7 +210,7 @@ func _keycap(text: String) -> Control:
 	cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 12)
+	l.add_theme_font_size_override("font_size", 16)
 	l.add_theme_color_override("font_color", Color(1, 0.95, 0.85))
 	cap.add_child(l)
 	return cap

@@ -185,6 +185,8 @@ func awaken() -> void:
 		tw.tween_property(sword, "position:y", sword.position.y + 3.0, 0.8)
 		tw.tween_callback(sword.queue_free)
 	_play("Awaken", 1.2)
+	Audio.sfx("gong", 0.0, 0.6, 0.0)
+	Audio.bgm("boss")
 
 
 func reset() -> void:
@@ -269,6 +271,7 @@ func _chase(delta: float) -> void:
 		velocity.z = 0
 		_play(_attack["anim"], float(_attack.get("speed", 1.0)) * _speed_mult)
 		_show_range(_attack)
+		Audio.sfx("swing", -3.0, 0.55) # 괴물은 낮고 느린 휘두름
 		return
 	if dist > 3.0:
 		var run := dist > 7.0
@@ -345,6 +348,8 @@ func take_hit(damage: int, from: Node3D = null) -> void:
 		lockable = false
 		velocity = Vector3.ZERO
 		_play("Death")
+		Audio.sfx("gong", 0.0, 0.5, 0.0)
+		Audio.bgm("ambient")
 		defeated.emit()
 		return
 	if phase == 1 and hp <= HP_MAX / 2:
@@ -355,6 +360,7 @@ func take_hit(damage: int, from: Node3D = null) -> void:
 		state = S.FLINCH
 		_state_time = -1.2 # Taunt 동안 멈춤
 		_play("Roar", 1.3)
+		Audio.sfx("gong", 2.0, 0.45, 0.0)
 		phase_changed.emit(2)
 		message.emit("괴물이 붉은 분노를 내뿜는다!")
 		return

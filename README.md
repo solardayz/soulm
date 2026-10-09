@@ -53,6 +53,10 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 - 보스: Mutant + Creature Pack(idle·breathing idle·walking·run·swiping·punch·jump attack·roaring·dying·flexing) — `assets/mixamo/{mutant,mutant_anim}/`
 - 둘 다 저장소에 올리지 않는다(.gitignore). 웹 빌드(.pck)에는 들어간다. 받는 방법: mixamo.com 로그인 → Characters에서 Paladin → Download(FBX Binary, T-pose) → Animations에서 "Pro Sword and Shield Pack"과 "Stand To Roll"(In Place) → `assets/mixamo/{paladin,anim}/` 에 `scripts/player.gd` 의 CLIPS 이름으로 저장.
 
+### 사운드 (CC0)
+- BGM: "Searching"(yd, OpenGameArt) 탐색용 앰비언트 · "Boss Battle (loop)"(Pro Sensory / Alex McCulloch, OpenGameArt) 보스전
+- 효과음: "20 Sword Sound Effects"(StarNinjas, OpenGameArt) 검 휘두름·클래시 · Kenney Impact Sounds(kenney.nl) 타격·발소리·종소리. 출처 정리는 `assets/audio/LICENSE_audio.txt`. 재생은 자동 로드 `scripts/audio.gd`(Audio.sfx / Audio.bgm).
+
 ### Poly Haven (CC0)
 - 하늘: Kloppenheim 07 Pure Sky HDRI 2k — `assets/sky/` (LICENSE_sky.txt). 밤 흐린 하늘·달빛 조명.
 
@@ -63,5 +67,5 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 라이선스 원문은 `assets/characters/LICENSE_*.txt`, `assets/dungeon/LICENSE_dungeon.txt`. 원본 전체 팩은 `_downloads/`(지워도 됨).
 
 ## 한계 / 다음 할 일
-- 사운드 없음(CC0 효과음 추가 예정), 보스 공격은 거리·각도 판정(무기 히트박스 아님)
+- 보스 공격은 거리·각도 판정(무기 히트박스 아님)
 - 다크소울3 고유 자산(모델·음악·대사)은 저작권이라 쓰지 않았다 — 연출과 조작감만 닮게 했다

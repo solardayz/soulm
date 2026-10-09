@@ -1,0 +1,7 @@
+BGM
+- ambient.ogg: "Searching" by yd — OpenGameArt, CC0. https://opengameart.org/content/searching
+- boss.mp3: "Boss Battle (loop)" by Pro Sensory (Alex McCulloch) — OpenGameArt, CC0. https://opengameart.org/content/boss-battle-loop
+
+SFX
+- swing_*/clash_*: "20 Sword Sound Effects" by StarNinjas — OpenGameArt, CC0. https://opengameart.org/content/20-sword-sound-effects-attacks-and-clashes
+- hit_*/hurt_*/step_*/parry/gong/roll/estus/ui: Kenney Impact Sounds — kenney.nl, CC0. https://kenney.nl/assets/impact-sounds

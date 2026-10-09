@@ -73,6 +73,7 @@ var _heal_done := false
 var _roll_dir := Vector3.FORWARD
 var _face_dir := Vector3.FORWARD
 var _busy_timer := 0.0
+var _step_timer := 0.0
 
 @onready var model: Node3D = $Model
 @onready var anim: AnimationPlayer = $Model/AnimationPlayer
@@ -178,6 +179,14 @@ func _do_move(delta: float, can_run: bool) -> void:
 		_play("Run")
 	else:
 		_play("Idle")
+	# 발소리 — 달릴 때 0.3초, 막으며 걸을 때 0.45초 간격
+	if dir.length() > 0.1 and is_on_floor():
+		_step_timer -= delta
+		if _step_timer <= 0.0:
+			_step_timer = 0.3 if can_run else 0.45
+			Audio.sfx("step", -14.0, 1.0, 0.12)
+	else:
+		_step_timer = 0.0
 
 
 func _face_target_or_dir(delta: float) -> void:
@@ -221,6 +230,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_state(S.HEAL)
 		_busy_timer = 1.3
 		_play_fit("Use_Item", 1.3)
+		Audio.sfx("estus", -2.0, 1.1)
 
 
 func _start_roll() -> void:
@@ -234,10 +244,12 @@ func _start_roll() -> void:
 		rotation.y = atan2(-_roll_dir.x, -_roll_dir.z)
 		_set_state(S.ROLL)
 		_play_fit("Roll", ROLL_TIME * 1.3) # 클립 끝의 일어서기는 다음 상태로 섞여 들어간다
+		Audio.sfx("roll", -6.0, 0.7)
 	else:
 		_roll_dir = -(-global_transform.basis.z) # 입력이 없으면 백스텝
 		_set_state(S.ROLL)
 		_play_fit("Roll", ROLL_TIME * 1.3)
+		Audio.sfx("roll", -6.0, 0.7)
 
 
 func _start_attack() -> void:
@@ -246,6 +258,7 @@ func _start_attack() -> void:
 	_attack_queued = false
 	_set_state(S.ATTACK)
 	_play_fit(ATTACK_ANIMS[_combo], 0.95)
+	Audio.sfx("swing", -4.0)
 
 
 func _deal_damage() -> void:
@@ -261,6 +274,7 @@ func _deal_damage() -> void:
 			var dmg := ATTACK_DAMAGE * (RIPOSTE_MULT if riposte else 1)
 			boss.take_hit(dmg, self)
 			hit_landed.emit(boss, dmg, riposte)
+			Audio.sfx("hit", 2.0 if riposte else -2.0, 0.9)
 
 
 ## 보스가 호출. 반환: "parry" | "block" | "dodge" | "hit" | "dead"
@@ -273,6 +287,7 @@ func take_hit(damage: int, from: Node3D = null) -> String:
 		_set_state(S.BUSY)
 		_busy_timer = 0.5
 		_play_fit("Riposte", 0.7)
+		Audio.sfx("parry", 2.0, 1.3, 0.0)
 		_hit_stop()
 		return "parry"
 	if state == S.BLOCK:
@@ -280,6 +295,7 @@ func take_hit(damage: int, from: Node3D = null) -> String:
 			_set_state(S.BUSY)
 			_busy_timer = 0.5
 			_play_fit("Riposte", 0.7)
+			Audio.sfx("parry", 2.0, 1.3, 0.0)
 			_hit_stop()
 			return "parry"
 		stamina -= BLOCK_HIT_COST
@@ -288,9 +304,11 @@ func take_hit(damage: int, from: Node3D = null) -> String:
 			_set_state(S.BUSY)
 			_busy_timer = 0.45
 			_play_fit("Block_Hit", 0.5)
+			Audio.sfx("clash", 0.0)
 			return "block"
 		stamina = 0 # 가드 브레이크
 	_apply_damage(damage)
+	Audio.sfx("hurt", 0.0, 0.8)
 	if state != S.DEAD:
 		_set_state(S.HIT)
 		_busy_timer = 0.55
@@ -332,6 +350,7 @@ func respawn(at: Vector3) -> void:
 	estus_changed.emit(estus)
 	_set_state(S.FREE)
 	_play("Idle")
+	Audio.bgm("ambient")
 
 
 func is_dead() -> bool:
