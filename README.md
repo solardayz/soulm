@@ -38,7 +38,8 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 |---|---|
 | `scenes/Main.tscn` | 월드·플레이어·보스·안개문·화톳불·HUD |
 | `scripts/level.gd` | KayKit 던전 조각으로 길·안개문 벽·아리나를 코드로 쌓음(충돌 포함) |
-| `scripts/player.gd` | 상태기계(이동/구르기/공격/막기·패리/피격/에스트/연출 잠금) + Knight 애니메이션 |
+| `scripts/player.gd` | 상태기계(이동/구르기/공격/막기·패리/피격/에스트/연출 잠금) + Mixamo 클립 재생 |
+| `scripts/mixamo_rig.gd` | Mixamo 클립 FBX 들을 모델의 AnimationPlayer 로 합침(루트 모션 제거, 반복 설정) |
 | `scripts/boss.gd` | 보스 AI(잠듦/깨어남/추격/공격/스태거/2페이즈/사망) + 도끼 본 부착 |
 | `scripts/fog_gate.gd` + `fog_gate.gdshader` | 안개(노이즈 셰이더) · 통과 연출 · 보이지 않는 벽 |
 | `scripts/camera_rig.gd` | 3인칭 오빗 카메라 · 스프링암 · 락온 |
@@ -46,9 +47,13 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 
 `Godot --path . -- --shot` 으로 실행하면 `_shots/`에 검증용 스크린샷을 찍고 전투 스모크 테스트 후 종료한다.
 
-## 에셋 (모두 CC0 — Kay Lousberg, kaylousberg.com)
+## 에셋
+### Mixamo (Adobe, 게임 안에 포함해 쓰는 건 무료 · 원본 파일 재배포 금지)
+- 플레이어: Paladin WProp J Nordstrom + Pro Sword and Shield Pack + Stand To Roll — `assets/mixamo/`(저장소에 올리지 않음, .gitignore). 받는 방법: mixamo.com 로그인 → Characters에서 Paladin → Download(FBX Binary, T-pose) → Animations에서 "Pro Sword and Shield Pack"과 "Stand To Roll"(In Place) → `assets/mixamo/{paladin,anim}/` 에 `scripts/player.gd` 의 CLIPS 이름으로 저장.
+
+### KayKit (모두 CC0 — Kay Lousberg, kaylousberg.com)
 - KayKit Dungeon Remastered 1.0 — 바닥·벽·기둥·잔해·횃불·배너
-- KayKit Character Pack: Adventurers 1.0 — 플레이어 기사(Knight, 애니메이션 76개)
+- KayKit Character Pack: Adventurers 1.0 — (이전 플레이어 Knight, 지금은 안 씀)
 - KayKit Character Pack: Skeletons 1.0 — 보스(Skeleton_Warrior ×2.2, 애니메이션 95개) + 도끼
 라이선스 원문은 `assets/characters/LICENSE_*.txt`, `assets/dungeon/LICENSE_dungeon.txt`. 원본 전체 팩은 `_downloads/`(지워도 됨).
 

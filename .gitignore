@@ -5,3 +5,6 @@
 _downloads/
 _shots/
 .DS_Store
+
+# Mixamo 원본(재배포 금지) — 빌드에는 들어가지만 저장소에는 올리지 않는다
+assets/mixamo/

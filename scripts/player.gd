@@ -1,6 +1,6 @@
 extends CharacterBody3D
 ## 플레이어(기사) — 소울류 조작: 카메라 기준 이동, 구르기(무적 프레임), 공격 2연타, 방패 막기 + 타이밍 패리, 에스트, 상호작용.
-## 애니메이션은 KayKit Knight.glb 의 AnimationPlayer 를 그대로 쓴다.
+## 모델은 Mixamo Paladin(검+방패 포함). 애니메이션은 Mixamo 클립 FBX 들을 MixamoRig 가 모델의 AnimationPlayer 에 모아 넣는다.
 
 signal hp_changed(hp: int, hp_max: int)
 signal stamina_changed(stamina: float, stamina_max: float)
@@ -24,7 +24,7 @@ const ATTACK_COST := 18.0
 const BLOCK_HIT_COST := 28.0
 const BLOCK_DAMAGE_RATIO := 0.15
 
-const ROLL_TIME := 0.62
+const ROLL_TIME := 0.7
 const ROLL_IFRAMES := 0.42
 const PARRY_WINDOW := 0.32
 const PARRY_COST := 12.0
@@ -36,9 +36,27 @@ const RIPOSTE_MULT := 3
 const ESTUS_MAX := 3
 const ESTUS_HEAL := 55
 
-const ATTACK_ANIMS := ["1H_Melee_Attack_Slice_Horizontal", "1H_Melee_Attack_Chop"]
-const HIDE_PARTS := ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "2H_Sword"]
-const LOOPS := ["Idle", "Running_A", "Walking_A", "Blocking", "Running_Strafe_Left", "Running_Strafe_Right"]
+const ATTACK_ANIMS := ["Attack_1", "Attack_2"]
+# 이름 → assets/mixamo/anim/<파일>.fbx. Walking_A·Interact·Sit_Floor_Down 은 안개문·검 줍기·화톳불이 부르는 이름
+const CLIPS := {
+	"Idle": "idle",
+	"Run": "run",
+	"Walk": "walk",
+	"Walking_A": "walk",
+	"Block_Idle": "block_idle",
+	"Block": "block",
+	"Block_Hit": "block",
+	"Riposte": "power_up",
+	"Use_Item": "power_up",
+	"Interact": "power_up",
+	"Attack_1": "slash",
+	"Attack_2": "slash_2",
+	"Roll": "roll",
+	"Hit": "impact",
+	"Death": "death",
+	"Sit_Floor_Down": "crouch"
+}
+const LOOPS := ["Idle", "Run", "Walk", "Walking_A", "Block_Idle"]
 
 var hp := HP_MAX
 var stamina := STAMINA_MAX
@@ -63,13 +81,7 @@ var _busy_timer := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
-	for part in HIDE_PARTS:
-		var n := model.find_child(part, true, false)
-		if n:
-			n.visible = false
-	for a in LOOPS:
-		if anim.has_animation(a):
-			anim.get_animation(a).loop_mode = Animation.LOOP_LINEAR
+	MixamoRig.build(anim, CLIPS, LOOPS)
 	_play("Idle")
 	hp_changed.emit(hp, HP_MAX)
 	stamina_changed.emit(stamina, STAMINA_MAX)
@@ -161,9 +173,9 @@ func _do_move(delta: float, can_run: bool) -> void:
 	elif dir.length() > 0.1:
 		_turn_toward(dir, delta)
 	if state == S.BLOCK:
-		_play("Blocking")
+		_play("Block_Idle")
 	elif dir.length() > 0.1:
-		_play("Running_A")
+		_play("Run")
 	else:
 		_play("Idle")
 
@@ -197,18 +209,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("block") and state == S.FREE:
 		_block_pressed_at = _now()
 		_set_state(S.BLOCK)
-		_play("Block")
+		_play("Block_Idle")
 	elif event.is_action_pressed("parry") and state in [S.FREE, S.BLOCK] and stamina >= PARRY_COST:
 		stamina -= PARRY_COST
 		_set_state(S.PARRY)
-		_play("Block", 1.6)
+		_play_fit("Block", PARRY_STANCE + 0.2)
 	elif event.is_action_pressed("heal") and state == S.FREE and estus > 0 and hp < HP_MAX:
 		estus -= 1
 		estus_changed.emit(estus)
 		_heal_done = false
 		_set_state(S.HEAL)
 		_busy_timer = 1.3
-		_play("Use_Item")
+		_play_fit("Use_Item", 1.3)
 
 
 func _start_roll() -> void:
@@ -221,11 +233,11 @@ func _start_roll() -> void:
 		_face_dir = _roll_dir
 		rotation.y = atan2(-_roll_dir.x, -_roll_dir.z)
 		_set_state(S.ROLL)
-		_play("Dodge_Forward", 1.0 / ROLL_TIME * 0.9)
+		_play_fit("Roll", ROLL_TIME * 1.3) # 클립 끝의 일어서기는 다음 상태로 섞여 들어간다
 	else:
 		_roll_dir = -(-global_transform.basis.z) # 입력이 없으면 백스텝
 		_set_state(S.ROLL)
-		_play("Dodge_Backward", 1.0 / ROLL_TIME * 0.9)
+		_play_fit("Roll", ROLL_TIME * 1.3)
 
 
 func _start_attack() -> void:
@@ -233,7 +245,7 @@ func _start_attack() -> void:
 	_attack_hit_done = false
 	_attack_queued = false
 	_set_state(S.ATTACK)
-	_play(ATTACK_ANIMS[_combo], 1.25)
+	_play_fit(ATTACK_ANIMS[_combo], 0.95)
 
 
 func _deal_damage() -> void:
@@ -260,14 +272,14 @@ func take_hit(damage: int, from: Node3D = null) -> String:
 	if state == S.PARRY and _state_time <= PARRY_WINDOW:
 		_set_state(S.BUSY)
 		_busy_timer = 0.5
-		_play("Block_Attack", 1.3)
+		_play_fit("Riposte", 0.7)
 		_hit_stop()
 		return "parry"
 	if state == S.BLOCK:
 		if _now() - _block_pressed_at <= PARRY_WINDOW:
 			_set_state(S.BUSY)
 			_busy_timer = 0.5
-			_play("Block_Attack", 1.3)
+			_play_fit("Riposte", 0.7)
 			_hit_stop()
 			return "parry"
 		stamina -= BLOCK_HIT_COST
@@ -275,14 +287,14 @@ func take_hit(damage: int, from: Node3D = null) -> String:
 			_apply_damage(int(damage * BLOCK_DAMAGE_RATIO))
 			_set_state(S.BUSY)
 			_busy_timer = 0.45
-			_play("Block_Hit")
+			_play_fit("Block_Hit", 0.5)
 			return "block"
 		stamina = 0 # 가드 브레이크
 	_apply_damage(damage)
 	if state != S.DEAD:
 		_set_state(S.HIT)
 		_busy_timer = 0.55
-		_play("Hit_A", 1.2)
+		_play_fit("Hit", 0.6)
 	return "hit"
 
 
@@ -298,7 +310,7 @@ func _apply_damage(damage: int) -> void:
 	hp_changed.emit(hp, HP_MAX)
 	if hp == 0:
 		_set_state(S.DEAD)
-		_play("Death_A")
+		_play("Death")
 		died.emit()
 
 
@@ -338,6 +350,14 @@ func _play(name: String, speed := 1.0) -> void:
 	if anim.current_animation == name and anim.is_playing() and name in LOOPS:
 		return
 	anim.play(name, 0.12, speed)
+
+
+## 클립 전체가 seconds 안에 끝나도록 속도를 맞춰 재생한다 (Mixamo 클립 길이가 제각각이라)
+func _play_fit(name: String, seconds: float) -> void:
+	if not anim.has_animation(name):
+		push_warning("애니메이션 없음: " + name)
+		return
+	_play(name, anim.get_animation(name).length / maxf(0.05, seconds))
 
 
 func _now() -> float:
