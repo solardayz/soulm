@@ -1,0 +1,8 @@
+# Godot
+.godot/
+*.import.tmp
+# 원본 에셋 팩 전체 · 검증 스크린샷 · 빌드 결과물
+_downloads/
+_shots/
+build/
+.DS_Store

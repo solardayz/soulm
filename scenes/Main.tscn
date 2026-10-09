@@ -1,0 +1,336 @@
+[gd_scene load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="s_main"]
+[ext_resource type="Script" path="res://scripts/level.gd" id="s_level"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="s_player"]
+[ext_resource type="Script" path="res://scripts/camera_rig.gd" id="s_cam"]
+[ext_resource type="Script" path="res://scripts/boss.gd" id="s_boss"]
+[ext_resource type="Script" path="res://scripts/fog_gate.gd" id="s_fog"]
+[ext_resource type="Script" path="res://scripts/bonfire.gd" id="s_bonfire"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="s_hud"]
+[ext_resource type="Script" path="res://scripts/touch_controls.gd" id="s_touch"]
+[ext_resource type="Shader" path="res://scripts/fog_gate.gdshader" id="sh_fog"]
+[ext_resource type="PackedScene" path="res://assets/characters/Knight.glb" id="m_knight"]
+[ext_resource type="PackedScene" path="res://assets/characters/Skeleton_Warrior.glb" id="m_boss"]
+[ext_resource type="PackedScene" path="res://assets/dungeon/torch_lit.glb" id="m_torch"]
+[ext_resource type="PackedScene" path="res://assets/dungeon/candle_lit.glb" id="m_candle"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.16, 0.17, 0.2, 1)
+sky_horizon_color = Color(0.42, 0.4, 0.38, 1)
+ground_bottom_color = Color(0.1, 0.09, 0.09, 1)
+ground_horizon_color = Color(0.3, 0.28, 0.26, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.55
+tonemap_mode = 2
+tonemap_exposure = 1.1
+ssao_enabled = true
+glow_enabled = true
+glow_intensity = 0.5
+glow_bloom = 0.1
+fog_enabled = true
+fog_light_color = Color(0.5, 0.5, 0.55, 1)
+fog_density = 0.012
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.02
+volumetric_fog_albedo = Color(0.7, 0.72, 0.78, 1)
+
+[sub_resource type="CapsuleShape3D" id="player_shape"]
+radius = 0.45
+height = 1.9
+
+[sub_resource type="BoxShape3D" id="boss_shape"]
+size = Vector3(2.4, 4.8, 2.4)
+
+[sub_resource type="QuadMesh" id="fog_mesh"]
+size = Vector2(2.6, 3.4)
+
+[sub_resource type="ShaderMaterial" id="fog_mat"]
+render_priority = 1
+shader = ExtResource("sh_fog")
+shader_parameter/push = 0.0
+shader_parameter/fade = 1.0
+shader_parameter/tint = Vector3(0.86, 0.9, 1.0)
+
+[sub_resource type="BoxShape3D" id="fog_wall_shape"]
+size = Vector3(2.6, 4, 0.4)
+
+[sub_resource type="BoxShape3D" id="trigger_shape"]
+size = Vector3(4, 3, 5)
+
+[sub_resource type="BoxMesh" id="sword_mesh"]
+size = Vector3(0.16, 5.2, 0.16)
+
+[sub_resource type="StandardMaterial3D" id="sword_mat"]
+albedo_color = Color(0.2, 0.19, 0.18, 1)
+metallic = 0.9
+roughness = 0.35
+emission_enabled = true
+emission = Color(0.9, 0.45, 0.1, 1)
+emission_energy_multiplier = 0.12
+
+[sub_resource type="SphereShape3D" id="sword_prompt_shape"]
+radius = 4.0
+
+[sub_resource type="SphereShape3D" id="bonfire_shape"]
+radius = 2.6
+
+[sub_resource type="StyleBoxFlat" id="sb_bg"]
+bg_color = Color(0.08, 0.08, 0.08, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.32, 0.28, 1)
+
+[sub_resource type="StyleBoxFlat" id="sb_hp"]
+bg_color = Color(0.72, 0.12, 0.1, 1)
+
+[sub_resource type="StyleBoxFlat" id="sb_st"]
+bg_color = Color(0.25, 0.65, 0.3, 1)
+
+[sub_resource type="StyleBoxFlat" id="sb_boss"]
+bg_color = Color(0.8, 0.2, 0.12, 1)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("s_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 20, 0)
+light_color = Color(0.85, 0.82, 0.78, 1)
+light_energy = 0.9
+shadow_enabled = true
+directional_shadow_max_distance = 80.0
+
+[node name="Level" type="Node3D" parent="."]
+script = ExtResource("s_level")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 23.5)
+script = ExtResource("s_player")
+
+[node name="Shape" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("player_shape")
+
+[node name="Model" parent="Player" instance=ExtResource("m_knight")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="CameraRig" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+script = ExtResource("s_cam")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Player/CameraRig"]
+spring_length = 4.8
+margin = 0.3
+
+[node name="Camera3D" type="Camera3D" parent="Player/CameraRig/SpringArm3D"]
+fov = 68.0
+current = true
+
+[node name="Boss" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -18)
+script = ExtResource("s_boss")
+
+[node name="Shape" type="CollisionShape3D" parent="Boss"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+shape = SubResource("boss_shape")
+
+[node name="Model" parent="Boss" instance=ExtResource("m_boss")]
+transform = Transform3D(-2.2, 0, 0, 0, 2.2, 0, 0, 0, -2.2, 0, 0, 0)
+
+[node name="CoiledSword" type="MeshInstance3D" parent="Boss"]
+transform = Transform3D(1, 0, 0, 0, 0.819152, -0.573576, 0, 0.573576, 0.819152, 0, 2.6, 0.9)
+mesh = SubResource("sword_mesh")
+surface_material_override/0 = SubResource("sword_mat")
+
+[node name="SwordPrompt" type="Area3D" parent="Boss"]
+
+[node name="Shape" type="CollisionShape3D" parent="Boss/SwordPrompt"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("sword_prompt_shape")
+
+[node name="FogGate" type="Node3D" parent="."]
+script = ExtResource("s_fog")
+
+[node name="Fog" type="MeshInstance3D" parent="FogGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+mesh = SubResource("fog_mesh")
+surface_material_override/0 = SubResource("fog_mat")
+
+[node name="Wall" type="StaticBody3D" parent="FogGate"]
+
+[node name="Shape" type="CollisionShape3D" parent="FogGate/Wall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("fog_wall_shape")
+
+[node name="Trigger" type="Area3D" parent="FogGate"]
+
+[node name="Shape" type="CollisionShape3D" parent="FogGate/Trigger"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 2.6)
+shape = SubResource("trigger_shape")
+
+[node name="GateLight" type="OmniLight3D" parent="FogGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0.8)
+light_color = Color(0.8, 0.86, 1, 1)
+light_energy = 1.6
+omni_range = 7.0
+
+[node name="Bonfire" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 21)
+script = ExtResource("s_bonfire")
+
+[node name="Torch" parent="Bonfire" instance=ExtResource("m_torch")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0.6, 0)
+
+[node name="Candle1" parent="Bonfire" instance=ExtResource("m_candle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0, 0.4)
+
+[node name="Candle2" parent="Bonfire" instance=ExtResource("m_candle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, 0.6)
+
+[node name="Candle3" parent="Bonfire" instance=ExtResource("m_candle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0, -0.9)
+
+[node name="Light" type="OmniLight3D" parent="Bonfire"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+light_color = Color(1, 0.65, 0.3, 1)
+light_energy = 2.4
+omni_range = 9.0
+shadow_enabled = true
+
+[node name="Area" type="Area3D" parent="Bonfire"]
+
+[node name="Shape" type="CollisionShape3D" parent="Bonfire/Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("bonfire_shape")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("s_hud")
+
+[node name="Top" type="Control" parent="HUD"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 460.0
+offset_bottom = 90.0
+
+[node name="HP" type="ProgressBar" parent="HUD/Top"]
+offset_right = 420.0
+offset_bottom = 16.0
+theme_override_styles/background = SubResource("sb_bg")
+theme_override_styles/fill = SubResource("sb_hp")
+value = 100.0
+show_percentage = false
+
+[node name="Stamina" type="ProgressBar" parent="HUD/Top"]
+offset_top = 22.0
+offset_right = 320.0
+offset_bottom = 34.0
+theme_override_styles/background = SubResource("sb_bg")
+theme_override_styles/fill = SubResource("sb_st")
+value = 100.0
+show_percentage = false
+
+[node name="Estus" type="Label" parent="HUD/Top"]
+offset_top = 40.0
+offset_right = 300.0
+offset_bottom = 66.0
+theme_override_font_sizes/font_size = 18
+text = "에스트 ×3  [R]"
+
+[node name="BossBox" type="Control" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -96.0
+offset_right = 320.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Name" type="Label" parent="HUD/BossBox"]
+offset_right = 640.0
+offset_bottom = 28.0
+theme_override_font_sizes/font_size = 22
+text = "심판자 IUDEX"
+
+[node name="Bar" type="ProgressBar" parent="HUD/BossBox"]
+offset_top = 32.0
+offset_right = 640.0
+offset_bottom = 46.0
+theme_override_styles/background = SubResource("sb_bg")
+theme_override_styles/fill = SubResource("sb_boss")
+value = 100.0
+show_percentage = false
+
+[node name="Prompt" type="Label" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -170.0
+offset_right = 300.0
+offset_bottom = -130.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = ""
+
+[node name="Message" type="Label" parent="HUD"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -400.0
+offset_top = 110.0
+offset_right = 400.0
+offset_bottom = 150.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+text = ""
+
+[node name="Big" type="Label" parent="HUD"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -50.0
+offset_right = 500.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 60
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "YOU DIED"
+
+[node name="Fade" type="ColorRect" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="TouchControls" type="CanvasLayer" parent="."]
+script = ExtResource("s_touch")
