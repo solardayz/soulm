@@ -53,6 +53,9 @@ Godot 4.7 프로젝트 매니저 → **가져오기** → 이 폴더의 `project
 - 보스: Mutant + Creature Pack(idle·breathing idle·walking·run·swiping·punch·jump attack·roaring·dying·flexing) — `assets/mixamo/{mutant,mutant_anim}/`
 - 둘 다 저장소에 올리지 않는다(.gitignore). 웹 빌드(.pck)에는 들어간다. 받는 방법: mixamo.com 로그인 → Characters에서 Paladin → Download(FBX Binary, T-pose) → Animations에서 "Pro Sword and Shield Pack"과 "Stand To Roll"(In Place) → `assets/mixamo/{paladin,anim}/` 에 `scripts/player.gd` 의 CLIPS 이름으로 저장.
 
+### Poly Haven (CC0)
+- 하늘: Kloppenheim 07 Pure Sky HDRI 2k — `assets/sky/` (LICENSE_sky.txt). 밤 흐린 하늘·달빛 조명.
+
 ### KayKit (모두 CC0 — Kay Lousberg, kaylousberg.com)
 - KayKit Dungeon Remastered 1.0 — 바닥·벽·기둥·잔해·횃불·배너
 - KayKit Character Pack: Adventurers 1.0 — (이전 플레이어 Knight, 지금은 안 씀)
