@@ -5,7 +5,7 @@ const SENS := 0.0028
 const PITCH_MIN := -0.9
 const PITCH_MAX := 0.5
 const LOCK_RANGE := 28.0
-const MARKER_HEIGHT := 3.7 # 보스(약 3.2m) 머리 위
+const MARKER_HEIGHT := 5.0 # 보스(약 4.3m) 머리 위
 
 var yaw := 0.0
 var pitch := -0.25
@@ -108,7 +108,7 @@ func _physics_process(delta: float) -> void:
 		_marker.position.y = MARKER_HEIGHT + sin(Time.get_ticks_msec() / 250.0) * 0.08
 	var anchor: Vector3 = player.global_position + Vector3(0, 1.6, 0)
 	if lock_target:
-		var to: Vector3 = lock_target.global_position + Vector3(0, 2.0, 0) - anchor
+		var to: Vector3 = lock_target.global_position + Vector3(0, 2.6, 0) - anchor
 		var target_yaw := atan2(-to.x, -to.z)
 		yaw = lerp_angle(yaw, target_yaw, minf(1.0, 8.0 * delta))
 		pitch = lerpf(pitch, -0.2, minf(1.0, 4.0 * delta))

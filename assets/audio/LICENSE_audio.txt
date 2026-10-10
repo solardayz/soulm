@@ -1,6 +1,7 @@
 BGM
 - ambient.ogg: "Searching" by yd — OpenGameArt, CC0. https://opengameart.org/content/searching
-- boss.mp3: "Boss Battle (loop)" by Pro Sensory (Alex McCulloch) — OpenGameArt, CC0. https://opengameart.org/content/boss-battle-loop
+- boss_choir.wav: "Fantasy Choir-3 orchestral pieces" 중 Fantasy Choir 2 by cesisco (César da Rocha) — OpenGameArt, CC0. https://opengameart.org/content/fantasy-choir-3-orchestral-pieces
+  (원본 24bit WAV 를 16bit 로 변환, Godot 에서 QOA 압축·루프. 이전 곡 "Boss Battle (loop)" by Pro Sensory 는 _downloads/oga_bgm2/old/ 에 보관)
 
 SFX
 - swing_*/clash_*: "20 Sword Sound Effects" by StarNinjas — OpenGameArt, CC0. https://opengameart.org/content/20-sword-sound-effects-attacks-and-clashes

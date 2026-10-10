@@ -136,4 +136,16 @@ func _debug_screenshots() -> void:
 	boss.take_hit(100, player)
 	await get_tree().process_frame
 	print("[shot] after hit boss hp=", boss.hp)
+	# 공격 판정: 보스 앞 2m 에서 마주보면 맞고, 등을 돌리면 안 맞아야 한다
+	var hp0: int = boss.hp
+	var fwd: Vector3 = -boss.global_transform.basis.z
+	player.global_position = boss.global_position + fwd * (boss.body_radius + 1.5)
+	player.rotation.y = atan2(fwd.x, fwd.z) # 보스를 마주봄 (-Z 전방)
+	player._deal_damage()
+	var facing_hit: bool = boss.hp < hp0
+	hp0 = boss.hp
+	player.rotation.y += PI # 등을 돌림
+	player._deal_damage()
+	var back_hit: bool = boss.hp < hp0
+	print("[shot] attack arc: facing hit=", facing_hit, " back hit=", back_hit)
 	get_tree().quit()

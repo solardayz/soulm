@@ -30,7 +30,7 @@ const PARRY_WINDOW := 0.32
 const PARRY_COST := 12.0
 const PARRY_STANCE := 0.45 # 전용 패리: 앞 0.32초가 성공 창, 나머지는 빈틈
 const ATTACK_RANGE := 2.4
-const ATTACK_ARC_DEG := 80.0
+const ATTACK_ARC_DEG := 60.0 # 전방 120도 부채꼴 — 옆·뒤는 안 맞는다
 const ATTACK_DAMAGE := 45
 const RIPOSTE_MULT := 3
 const ESTUS_MAX := 3
@@ -116,7 +116,7 @@ func _physics_process(delta: float) -> void:
 			var len := maxf(anim.current_animation_length, 0.01)
 			var frac := anim.current_animation_position / len
 			if frac < 0.35:
-				_face_target_or_dir(delta)
+				_face_target_or_dir(delta, true)
 			if not _attack_hit_done and frac >= 0.42:
 				_attack_hit_done = true
 				_deal_damage()
@@ -189,11 +189,21 @@ func _do_move(delta: float, can_run: bool) -> void:
 		_step_timer = 0.0
 
 
-func _face_target_or_dir(delta: float) -> void:
+## attacking=true 면 공격 중 보정 — 락온 대상이 대략 앞(90도 이내)에 있을 때만 살짝 따라가고,
+## 옆·뒤에 있으면 몸을 돌리지 않는다 (등 뒤의 보스를 제자리에서 휙 돌아 때리던 문제)
+func _face_target_or_dir(delta: float, attacking := false) -> void:
 	if lock_target:
-		_turn_toward(lock_target.global_position - global_position, delta * 2)
+		var to: Vector3 = lock_target.global_position - global_position
+		to.y = 0
+		if attacking and to.length() > 0.01:
+			var forward := -global_transform.basis.z
+			if rad_to_deg(forward.angle_to(to.normalized())) > 90.0:
+				return
+			_turn_toward(to, delta)
+			return
+		_turn_toward(to, delta * 2)
 	else:
-		_turn_toward(_face_dir, delta * 2)
+		_turn_toward(_face_dir, delta * (1 if attacking else 2))
 
 
 func _turn_toward(dir: Vector3, delta: float) -> void:

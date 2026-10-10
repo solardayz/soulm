@@ -21,12 +21,12 @@ const POISE := 150 # 이만큼 맞으면 잠깐 휘청
 
 # hit: 클립 진행률 중 명중 시점 · speed: 클립 재생 속도 (Mixamo 클립 길이가 제각각이라 공격마다 정한다)
 const ATTACKS_P1 := [
-	{"anim": "Swipe", "dmg": 28, "hit": 0.45, "range": 3.8, "arc": 110.0, "cd": 1.0, "lunge": 1.0, "speed": 1.1},
-	{"anim": "Punch", "dmg": 34, "hit": 0.5, "range": 3.6, "arc": 60.0, "cd": 1.1, "lunge": 1.5, "speed": 0.9},
-	{"anim": "Jump_Attack", "dmg": 40, "hit": 0.62, "range": 6.0, "arc": 50.0, "cd": 1.5, "lunge": 3.5, "speed": 1.25}
+	{"anim": "Swipe", "dmg": 28, "hit": 0.45, "range": 4.4, "arc": 110.0, "cd": 1.0, "lunge": 1.0, "speed": 1.1},
+	{"anim": "Punch", "dmg": 34, "hit": 0.5, "range": 4.2, "arc": 60.0, "cd": 1.1, "lunge": 1.5, "speed": 0.9},
+	{"anim": "Jump_Attack", "dmg": 40, "hit": 0.62, "range": 6.8, "arc": 50.0, "cd": 1.5, "lunge": 3.5, "speed": 1.25}
 ]
 const ATTACKS_P2 := [
-	{"anim": "Jump_Attack", "dmg": 50, "hit": 0.62, "range": 7.0, "arc": 100.0, "cd": 1.3, "lunge": 4.5, "speed": 1.35}
+	{"anim": "Jump_Attack", "dmg": 50, "hit": 0.62, "range": 7.8, "arc": 100.0, "cd": 1.3, "lunge": 4.5, "speed": 1.35}
 ]
 # 이름 → assets/mixamo/mutant_anim/<파일>.fbx
 const CLIPS := {
@@ -50,7 +50,7 @@ var state := S.DORMANT
 var phase := 1
 var staggered := false
 var lockable := false
-var body_radius := 1.2
+var body_radius := 1.6 # Mutant x2.3 — 플레이어 공격 사거리에 더해진다
 
 var _player: CharacterBody3D
 var _state_time := 0.0
@@ -273,8 +273,8 @@ func _chase(delta: float) -> void:
 		_show_range(_attack)
 		Audio.sfx("swing", -3.0, 0.55) # 괴물은 낮고 느린 휘두름
 		return
-	if dist > 3.0:
-		var run := dist > 7.0
+	if dist > 3.6:
+		var run := dist > 7.5
 		var spd := (RUN_SPEED if run else WALK_SPEED) * _speed_mult
 		var dir := to.normalized()
 		velocity.x = dir.x * spd

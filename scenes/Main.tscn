@@ -48,7 +48,7 @@ radius = 0.45
 height = 1.9
 
 [sub_resource type="BoxShape3D" id="boss_shape"]
-size = Vector3(2.4, 4.8, 2.4)
+size = Vector3(3.2, 6.4, 3.2)
 
 [sub_resource type="QuadMesh" id="fog_mesh"]
 size = Vector2(2.6, 3.4)
@@ -78,7 +78,7 @@ emission = Color(0.9, 0.45, 0.1, 1)
 emission_energy_multiplier = 0.12
 
 [sub_resource type="SphereShape3D" id="sword_prompt_shape"]
-radius = 4.0
+radius = 5.0
 
 [sub_resource type="SphereShape3D" id="bonfire_shape"]
 radius = 2.6
@@ -144,14 +144,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -18)
 script = ExtResource("s_boss")
 
 [node name="Shape" type="CollisionShape3D" parent="Boss"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("boss_shape")
 
 [node name="Model" parent="Boss" instance=ExtResource("m_boss")]
-transform = Transform3D(-1.7, 0, 0, 0, 1.7, 0, 0, 0, -1.7, 0, 0, 0)
+transform = Transform3D(-2.3, 0, 0, 0, 2.3, 0, 0, 0, -2.3, 0, 0, 0)
 
 [node name="CoiledSword" type="MeshInstance3D" parent="Boss"]
-transform = Transform3D(1, 0, 0, 0, 0.819152, -0.573576, 0, 0.573576, 0.819152, 0, 2.6, 0.9)
+transform = Transform3D(1, 0, 0, 0, 0.819152, -0.573576, 0, 0.573576, 0.819152, 0, 3.5, 1.2)
 mesh = SubResource("sword_mesh")
 surface_material_override/0 = SubResource("sword_mat")
 

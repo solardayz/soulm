@@ -17,7 +17,7 @@ const SFX := {
 	"estus": ["estus"],
 	"ui": ["ui"]
 }
-const BGM := {"ambient": "ambient.ogg", "boss": "boss.mp3"}
+const BGM := {"ambient": "ambient.ogg", "boss": "boss_choir.wav"}
 const BGM_DB := -11.0
 const POOL := 10
 
@@ -74,7 +74,12 @@ func bgm(name: String) -> void:
 	if s == null:
 		push_warning("BGM 없음: " + name)
 		return
-	if "loop" in s:
+	if s is AudioStreamWAV:
+		var w := s as AudioStreamWAV
+		w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		w.loop_begin = 0
+		w.loop_end = int(w.get_length() * w.mix_rate)
+	elif "loop" in s:
 		s.loop = true
 	_bgm_name = name
 	var out := _bgm_a if _bgm_a.playing else _bgm_b
